@@ -138,7 +138,15 @@
 		var process = (function(that) {
 			return function() {
 				return (function() {
-					var onReady;
+					
+					function hasContentType(type) {
+						var ct = mockHandler.headers['Content-Type']; 
+						return ct ? type.test(ct) : false;
+					}
+					
+					var onReady, 
+						jsonType = requestSettings.contents['json'],
+						xmlType = requestSettings.contents['xml'];
 
 					// The request has returned
 					this.status     = mockHandler.status;
@@ -152,9 +160,9 @@
 					}
 					// Copy over our mock to our xhr object before passing control back to
 					// jQuery's onreadystatechange callback
-					if ( requestSettings.dataType == 'json' && ( typeof mockHandler.responseText == 'object' ) ) {
+					if ( (requestSettings.dataType == 'json' || hasContentType(jsonType)) && ( typeof mockHandler.responseText == 'object' ) ) {
 						this.responseText = JSON.stringify(mockHandler.responseText);
-					} else if ( requestSettings.dataType == 'xml' ) {
+					} else if ( requestSettings.dataType == 'xml'  || hasContentType(jsonType)) {
 						if ( typeof mockHandler.responseXML == 'string' ) {
 							this.responseXML = parseXML(mockHandler.responseXML);
 							//in jQuery 1.9.1+, responseXML is processed differently and relies on responseText
